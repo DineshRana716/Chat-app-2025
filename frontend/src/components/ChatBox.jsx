@@ -1,7 +1,7 @@
 import React from "react";
 
 const ChatBox = () => {
-  return <div>Chat Box</div>;
+  return <div></div>;
 };
 
 export default ChatBox;
