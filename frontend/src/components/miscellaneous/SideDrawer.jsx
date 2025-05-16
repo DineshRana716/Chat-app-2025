@@ -95,7 +95,7 @@ const SideDrawer = () => {
       };
       console.log("Making API request to create/access chat");
       const { data } = await axios.post(
-        "http://localhost:5000/api/user/chat",
+        "http://localhost:5000/api/chat",
         { userId },
         config
       );

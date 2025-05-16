@@ -46,20 +46,25 @@ const fetchChats = asyncHandler(async (req, res) => {
   try {
     console.log("Fetching chats for user:", req.user._id);
 
-    const chats = await Chat.find({
-      users: { $elemMatch: { $eq: req.user._id } },
-    })
+    try {
+      const chats = await Chat.find({
+        users: { $elemMatch: { $eq: req.user._id } },
+      })
       .populate("users", "-password")
       .populate("groupAdmin", "-password")
       .populate("latestMessage")
-      .sort({ updatedAt: -1 })
-      .then(async (results) => {
-        results = await User.populate(results, {
-          path: "latestMessage.sender",
-          select: "name pic email",
-        });
-        res.status(200).send(results);
+      .sort({ updatedAt: -1 });
+
+      const populatedChats = await User.populate(chats, {
+        path: "latestMessage.sender",
+        select: "name pic email",
       });
+
+      res.status(200).json(populatedChats);
+    } catch (error) {
+      console.error("Error in fetchChats:", error);
+      res.status(400).json({ message: error.message });
+    }
   } catch (error) {
     console.error("Error in fetchChats:", error);
     res.status(400).json({ message: error.message });

@@ -7,24 +7,30 @@ import { Button } from "@chakra-ui/react";
 import ChatLoading from "./ChatLoading";
 import { getSender } from "../config/ChatLogics";
 import { Text } from "@chakra-ui/layout";
+import GroupChatModal from "./miscellaneous/GroupChatModal";
+import axios from "axios";
 
-const MyChat = () => {
+const MyChat = ({ fetchAgain }) => {
   const [loggedUser, setLoggedUser] = useState();
-  const { selectedChat, setSelectedChat, user, chats, setChats } = ChatState();
+  const { selectedChat, setSelectedChat, user, chats, setchats } = ChatState();
 
   const toast = useToast();
 
   const fetchChats = async () => {
+    //console.log("user token:", user?.token);
     try {
       const config = {
         headers: {
           Authorization: `Bearer ${user.token}`,
         },
       };
-      const { data } = await axios.get("/api/chat", config);
+      const { data } = await axios.get(
+        "http://localhost:5000/api/chats", 
+        config
+      );
+      console.log("passed");
       console.log(data);
-
-      setChats(data);
+      setchats(data);
     } catch (error) {
       toast({
         title: "error occurred",
@@ -40,7 +46,7 @@ const MyChat = () => {
   useEffect(() => {
     setLoggedUser(JSON.parse(localStorage.getItem("userInfo")));
     fetchChats();
-  }, []);
+  }, [fetchAgain]);
 
   return (
     <Box
@@ -49,7 +55,7 @@ const MyChat = () => {
       alignItems="center"
       p={3}
       bg="white"
-      w={{ base: "100%", md: "31%" }}
+      w={{ base: "100%", md: "30%" }}
       borderRadius="lg"
       borderWidth="1px"
       h="100%"
@@ -65,13 +71,15 @@ const MyChat = () => {
         alignItems="center"
       >
         My Chats
-        <Button
-          d="flex"
-          fontSize={{ base: "17px", md: "10px", lg: "17px" }}
-          rightIcon={<AddIcon />}
-        >
-          New Group Chat
-        </Button>
+        <GroupChatModal>
+          <Button
+            d="flex"
+            fontSize={{ base: "17px", md: "10px", lg: "17px" }}
+            rightIcon={<AddIcon />}
+          >
+            New Group Chat
+          </Button>
+        </GroupChatModal>
       </Box>
       <Box
         display="flex"
@@ -87,7 +95,11 @@ const MyChat = () => {
           <Stack overflowY="auto">
             {chats.map((chat) => (
               <Box
-                onClick={() => setSelectedChat(chat)}
+                onClick={() => {
+                  console.log("Clicked chat:", chat);
+                  setSelectedChat(chat);
+                  console.log("selected chat:", selectedChat);
+                }}
                 cursor="pointer"
                 bg={selectedChat === chat ? "#38B2AC" : "#E8E8E8"}
                 color={selectedChat === chat ? "white" : "black"}
