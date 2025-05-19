@@ -30,6 +30,9 @@
     "framer-motion": "^10.18.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^7.4.1"
+    "react-lottie": "^1.2.10",
+    "react-router-dom": "^7.4.1",
+    "react-scrollable-feed": "^2.0.2",
+    "socket.io-client": "^4.8.1"
   }
 }

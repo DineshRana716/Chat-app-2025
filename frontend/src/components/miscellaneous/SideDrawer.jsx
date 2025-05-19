@@ -65,7 +65,7 @@ const SideDrawer = () => {
       };
 
       const { data } = await axios.get(
-        `http://localhost:5000/api/user?search=${search}`,
+        `http://localhost:5000/api/users?search=${search}`,
         config
       );
 
@@ -95,7 +95,7 @@ const SideDrawer = () => {
       };
       console.log("Making API request to create/access chat");
       const { data } = await axios.post(
-        "http://localhost:5000/api/chat",
+        "http://localhost:5000/api/chats",
         { userId },
         config
       );

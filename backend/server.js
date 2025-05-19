@@ -28,4 +28,52 @@ app.use("/api/messages", messageRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
-app.listen(PORT, () => console.log(`server running on PORT ${PORT}`));
+const server = app.listen(PORT, () =>
+  console.log(`server running on PORT ${PORT}`)
+);
+
+const io = require("socket.io")(server, {
+  pingTimeout: 60000,
+  cors: {
+    origin: "http://localhost:5173",
+  },
+});
+
+io.on("connection", (socket) => {
+  console.log("connected to socket.io");
+
+  socket.on("setup", (userdata) => {
+    socket.join(userdata._id);
+    console.log("User joined their own room:", userdata._id);
+    socket.emit("connected");
+  });
+
+  socket.on("join chat", (room) => {
+    socket.join(room);
+    console.log("User joined chat room:", room);
+  });
+
+  socket.on("typing", (room, userId) => {
+    console.log("Typing event in room:", room, "by user:", userId);
+    socket.to(room).emit("typing", userId);
+  });
+
+  socket.on("stop typing", (room, userId) => {
+    console.log("Stop typing event in room:", room, "by user:", userId);
+    socket.to(room).emit("stop typing", userId);
+  });
+
+  socket.on("newMessage", (newMessageReceived) => {
+    var chat = newMessageReceived.chat;
+    if (!chat.users) return console.log("chat.users not found");
+
+    chat.users.forEach((user) => {
+      if (user._id == newMessageReceived.sender._id) return;
+      socket.in(user._id).emit("message received", newMessageReceived);
+    });
+  });
+  socket.off("setup", () => {
+    console.log("USER DISCONNECTED");
+    socket.leave(userData._id);
+  });
+});

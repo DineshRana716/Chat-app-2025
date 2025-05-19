@@ -34,14 +34,12 @@ const sendMessage=asyncHandler(async(req,res)=>{
 })
 const allMessages=asyncHandler(async(req,res)=>{
     try {
-        console.log('Fetching messages for chat ID:', req.params.chatId);
-        const message=await Message.find({chat:req.params.chatId}).populate(
+       const message=await Message.find({chat:req.params.chatId}).populate(
             "sender","name pic email"
         ).populate("chat");
         res.json(message);
     } catch (error) {
-        console.error('Error fetching messages:', error);
-        res.status(400);
+       res.status(400);
         throw new Error(error.message);
     }
 })

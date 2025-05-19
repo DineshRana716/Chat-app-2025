@@ -22,7 +22,7 @@ import UserBadgeItem from "../UserAvatar/UserBadgeItem";
 import UserListItem from "../UserAvatar/UserListItem";
 import { Spinner } from "@chakra-ui/spinner"; 
 
-const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain }) => {
+const UpdateGroupChatModal = ({ fetchMessages,fetchAgain, setFetchAgain }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [groupChatName, setGroupChatName] = useState();
   //const [selectedUsers, setSelectedUsers] = useState([]);
@@ -181,6 +181,7 @@ const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain }) => {
         ?setSelectedChat()
         :setSelectedChat(data);
         setFetchAgain(!fetchAgain);
+        fetchMessages();
         setLoading(false);
       
     } catch (error) {

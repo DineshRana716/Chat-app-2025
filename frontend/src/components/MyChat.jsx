@@ -28,7 +28,6 @@ const MyChat = ({ fetchAgain }) => {
         "http://localhost:5000/api/chats", 
         config
       );
-      console.log("passed");
       console.log(data);
       setchats(data);
     } catch (error) {
@@ -96,9 +95,7 @@ const MyChat = ({ fetchAgain }) => {
             {chats.map((chat) => (
               <Box
                 onClick={() => {
-                  console.log("Clicked chat:", chat);
                   setSelectedChat(chat);
-                  console.log("selected chat:", selectedChat);
                 }}
                 cursor="pointer"
                 bg={selectedChat === chat ? "#38B2AC" : "#E8E8E8"}
