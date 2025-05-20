@@ -23,12 +23,11 @@ import { io } from "socket.io-client";
 const ENDPOINT = "http://localhost:5000";
 var socket, selectedChatCompare;
 
-const SingleChat = ({ fetchAgain, setfetchAgain }) => {
+const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [newMessage, setNewMessage] = useState("");
   const [socketConnected, setSocketConnected] = useState(false);
-  const [typing, setTyping] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const toast = useToast();
 
@@ -41,7 +40,8 @@ const SingleChat = ({ fetchAgain, setfetchAgain }) => {
     },
   };
 
-  const { user, selectedChat, setSelectedChat } = ChatState();
+  const { user, selectedChat, setSelectedChat, notification, setNotification } =
+    ChatState();
 
   const fetchMessages = async () => {
     if (!selectedChat) return;
@@ -73,12 +73,12 @@ const SingleChat = ({ fetchAgain, setfetchAgain }) => {
   };
 
   const sendMessage = async (event) => {
-    if (event.key == "Enter" && newMessage) {
+    if (event.key === "Enter" && newMessage) {
       socket.emit("stop typing", selectedChat._id);
       try {
         const config = {
           headers: {
-            "Content-Type": "application/json",
+            "Content-type": "application/json",
             Authorization: `Bearer ${user.token}`,
           },
         };
@@ -87,11 +87,10 @@ const SingleChat = ({ fetchAgain, setfetchAgain }) => {
           "http://localhost:5000/api/messages",
           {
             content: newMessage,
-            chatId: selectedChat._id,
+            chatId: selectedChat,
           },
           config
         );
-        console.log(data);
         socket.emit("newMessage", data);
         setMessages([...messages, data]);
       } catch (error) {
@@ -113,16 +112,30 @@ const SingleChat = ({ fetchAgain, setfetchAgain }) => {
       console.log("Socket connected");
       setSocketConnected(true);
     });
+
     socket.on("typing", (typingUser) => {
-      console.log("Typing event received from:", typingUser);
       if (typingUser !== user._id) {
         setIsTyping(true);
       }
     });
+
     socket.on("stop typing", (typingUser) => {
-      console.log("Stop typing event received from:", typingUser);
       if (typingUser !== user._id) {
         setIsTyping(false);
+      }
+    });
+
+    socket.on("message received", (newMessageReceived) => {
+      if (
+        !selectedChatCompare ||
+        selectedChatCompare._id !== newMessageReceived.chat._id
+      ) {
+        if (!notification.includes(newMessageReceived)) {
+          setNotification([newMessageReceived, ...notification]);
+          setFetchAgain(!fetchAgain);
+        }
+      } else {
+        setMessages([...messages, newMessageReceived]);
       }
     });
 
@@ -130,35 +143,19 @@ const SingleChat = ({ fetchAgain, setfetchAgain }) => {
       socket.off("connected");
       socket.off("typing");
       socket.off("stop typing");
+      socket.off("message received");
     };
-  }, []);
+  }, [user, messages, notification, fetchAgain]);
 
   useEffect(() => {
     fetchMessages();
     selectedChatCompare = selectedChat;
   }, [selectedChat]);
 
-  useEffect(() => {
-    socket.on("message received", (newMessageReceived) => {
-      if (
-        !selectedChatCompare ||
-        selectedChatCompare._id !== newMessageReceived.chat._id
-      ) {
-        //give notifications
-      } else {
-        setMessages([...messages, newMessageReceived]);
-      }
-    });
-
-    return () => {
-      socket.off("message received");
-    };
-  }, [messages]);
-
   const typingHandler = (e) => {
     setNewMessage(e.target.value);
 
-    if (!socketConnected || !selectedChat) return;
+    if (!socketConnected) return;
 
     // Clear any existing timeout
     if (window.typingTimeout) {
@@ -166,12 +163,10 @@ const SingleChat = ({ fetchAgain, setfetchAgain }) => {
     }
 
     // Emit typing event immediately with user ID
-    console.log("Emitting typing event for user:", user._id);
     socket.emit("typing", selectedChat._id, user._id);
 
     // Set new timeout
     window.typingTimeout = setTimeout(() => {
-      console.log("Emitting stop typing event for user:", user._id);
       socket.emit("stop typing", selectedChat._id, user._id);
     }, 1000);
   };
@@ -204,7 +199,7 @@ const SingleChat = ({ fetchAgain, setfetchAgain }) => {
                 {selectedChat.chatName.toUpperCase()}
                 <UpdateGroupChatModal
                   fetchAgain={fetchAgain}
-                  setFetchAgain={setfetchAgain}
+                  setFetchAgain={setFetchAgain}
                   fetchMessages={fetchMessages}
                 />
               </>

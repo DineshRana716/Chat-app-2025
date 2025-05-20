@@ -11,7 +11,6 @@ import {
   MenuDivider,
   Drawer,
   DrawerBody,
-  DrawerFooter,
   DrawerHeader,
   DrawerOverlay,
   DrawerContent,
@@ -28,6 +27,9 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import UserListItem from "../UserAvatar/UserListItem";
 import { Spinner } from "@chakra-ui/spinner";
+import { getSender } from "../../config/ChatLogics";
+import NotificationBadge from "react-notification-badge";
+import { Effect } from "react-notification-badge";
 
 const SideDrawer = () => {
   const [search, setSearch] = useState("");
@@ -35,7 +37,14 @@ const SideDrawer = () => {
   const [loading, setLoading] = useState(false);
   const [loadingChat, setLoadingChat] = useState(false);
 
-  const { user, setSelectedChat, chats, setchats } = ChatState();
+  const {
+    user,
+    setSelectedChat,
+    chats,
+    setchats,
+    notification,
+    setNotification,
+  } = ChatState();
   const navigate = useNavigate();
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -84,7 +93,6 @@ const SideDrawer = () => {
     }
   };
   const accessChat = async (userId) => {
-    console.log("accessChat called with userId:", userId);
     try {
       setLoadingChat(true);
       const config = {
@@ -93,26 +101,20 @@ const SideDrawer = () => {
           Authorization: `Bearer ${user.token}`,
         },
       };
-      console.log("Making API request to create/access chat");
       const { data } = await axios.post(
         "http://localhost:5000/api/chats",
         { userId },
         config
       );
-      console.log("Chat API response:", data);
 
       if (!chats.find((c) => c._id === data._id)) {
-        console.log("Adding new chat to state");
         setchats([data, ...chats]);
-      } else {
-        console.log("Chat already exists in state");
       }
 
       setSelectedChat(data);
       setLoadingChat(false);
       onClose();
     } catch (error) {
-      console.error("Error in accessChat:", error);
       toast({
         title: "error fetching the chat",
         description: error.message,
@@ -151,8 +153,28 @@ const SideDrawer = () => {
         <div>
           <Menu>
             <MenuButton p={1}>
+              <NotificationBadge
+                count={notification.length}
+                effect={Effect.SCALE}
+              />
               <BellIcon fontSize="2xl" m={1} />
             </MenuButton>
+            <MenuList pl={2}>
+              {!notification.length && "no new Messages"}
+              {notification.map((notif) => (
+                <MenuItem
+                  key={notif._id}
+                  onClick={() => {
+                    setSelectedChat(notif.chat);
+                    setNotification(notification.filter((n) => n !== notif));
+                  }}
+                >
+                  {notif.chat.isGroupChat
+                    ? `New Message in ${notif.chat.chatName}`
+                    : `New Message from ${getSender(user, notif.chat.users)}`}
+                </MenuItem>
+              ))}
+            </MenuList>
           </Menu>
           <Menu>
             <MenuButton as={Button} rightIcon={<ChevronDownIcon />}>

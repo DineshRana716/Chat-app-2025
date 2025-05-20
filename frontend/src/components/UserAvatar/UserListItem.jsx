@@ -19,7 +19,7 @@ const UserListItem = ({ user, handleFunction }) => {
         color: "white",
       }}
       w="100%"
-      display="flex"
+      d="flex"
       alignItems="center"
       color="black"
       px={3}
@@ -37,7 +37,7 @@ const UserListItem = ({ user, handleFunction }) => {
       <Box>
         <Text>{user.name}</Text>
         <Text fontSize="xs">
-          <b>Email: </b>
+          <b>Email : </b>
           {user.email}
         </Text>
       </Box>

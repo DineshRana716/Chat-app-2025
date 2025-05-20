@@ -29,8 +29,6 @@ const Signup = () => {
 
   const postDetails = async (pics) => {
     setLoading(true);
-    console.log("Starting upload process...");
-    console.log("Selected file:", pics);
 
     if (pics === undefined) {
       toast({
@@ -69,14 +67,11 @@ const Signup = () => {
           }
         );
 
-        console.log("Upload response status:", response.status);
-
         if (!response.ok) {
           throw new Error("Upload failed");
         }
 
         const result = await response.json();
-        console.log("Upload result:", result);
 
         setPic(result.secure_url);
         setLoading(false);
@@ -135,6 +130,7 @@ const Signup = () => {
       setLoading(false);
       return;
     }
+
     try {
       console.log("Attempting to make signup request...");
       const config = {

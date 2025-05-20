@@ -3,7 +3,7 @@ import React from "react";
 import { ChatState } from "../Context/ChatProvider";
 import SingleChat from "./SingleChat";
 
-const ChatBox = ({ fetchAgain, setfetchAgain }) => {
+const ChatBox = ({ fetchAgain, setFetchAgain }) => {
   const { selectedChat } = ChatState();
   return (
     <Box
@@ -18,7 +18,7 @@ const ChatBox = ({ fetchAgain, setfetchAgain }) => {
       borderWidth="1px"
       h="100%"
     >
-      <SingleChat fetchAgain={fetchAgain} setfetchAgain={setfetchAgain} />
+      <SingleChat fetchAgain={fetchAgain} setFetchAgain={setFetchAgain} />
     </Box>
   );
 };
